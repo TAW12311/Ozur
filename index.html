@@ -188,7 +188,7 @@
     </div>
 
     <div class="message" id="message">
-      Gerçekten özür dilerim. Seni kırmak hiç istemezdim.
+      Gerçekten özür dilerim. Seni üzmek hiç istemezdim.
     </div>
 
     <div class="buttons-area" id="buttonsArea">
@@ -207,6 +207,7 @@
     const buttonsArea = document.getElementById("buttonsArea");
 
     let clickCount = 0;
+    let isMoving = false;
 
     const messages = [
       "Gerçekten özür dilerim. Seni üzmek hiç istemezdim.",
@@ -215,7 +216,7 @@
       "Aramızın böyle olmasını istemiyorum, hep güzel olalım istiyorum.",
       "Yaptığım hatayı son kez telafi etmek istiyorum.",
       "Bir şans daha verirsen gerçekten daha dikkatli olacağım ve bazı şeyler değişecek, seni çok seviyorum.",
-      "Seni üzmek istememiştim,sni çok seviyorum.",
+      "Seni üzmek istememiştim, seni çok seviyorum.",
       "Benim için çok değerlisin.",
       "Sadece bir kez daha düşünmeni istiyorum.",
       "Gerçekten kalpten özür diliyorum."
@@ -228,8 +229,8 @@
       const btnWidth = noBtn.offsetWidth;
       const btnHeight = noBtn.offsetHeight;
 
-      const maxX = areaWidth - btnWidth;
-      const maxY = areaHeight - btnHeight;
+      const maxX = Math.max(0, areaWidth - btnWidth);
+      const maxY = Math.max(0, areaHeight - btnHeight);
 
       const randomX = Math.random() * maxX;
       const randomY = Math.random() * maxY;
@@ -238,19 +239,21 @@
       noBtn.style.top = randomY + "px";
     }
 
-    noBtn.addEventListener("click", function () {
+    function handleNoClick(e) {
+      if (e) e.preventDefault();
+      if (isMoving) return;
+
+      isMoving = true;
       clickCount++;
 
       const index = Math.min(clickCount, messages.length - 1);
       message.textContent = messages[index];
 
-      moveNoButton();
-
       const scale = 1 + clickCount * 0.07;
       yesBtn.style.transform = `translateX(-50%) scale(${scale})`;
 
       if (clickCount >= 2) {
-        yesBtn.textContent = "Lütfen Affet ";
+        yesBtn.textContent = "Lütfen Affet";
       }
       if (clickCount >= 5) {
         yesBtn.textContent = "Bir Şans Daha Ver";
@@ -258,11 +261,15 @@
       if (clickCount >= 8) {
         yesBtn.textContent = "Aşkım Nolursun Lütfen Affet";
       }
-    });
 
-    noBtn.addEventListener("touchstart", function () {
-      moveNoButton();
-    });
+      setTimeout(() => {
+        moveNoButton();
+        isMoving = false;
+      }, 100);
+    }
+
+    noBtn.addEventListener("click", handleNoClick);
+    noBtn.addEventListener("touchend", handleNoClick, { passive: false });
 
     yesBtn.addEventListener("click", function () {
       message.textContent = "Teşekkür ederim. Bunu düzeltmek için elimden geleni yapacağım.";
